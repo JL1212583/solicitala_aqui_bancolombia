@@ -1,26 +1,26 @@
-# Usar imagen oficial de PHP con Apache
+# Usa imagen oficial de PHP con Apache
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias, por ejemplo para bases de datos
+# Instala extensiones necesarias
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Copiar todo el proyecto al directorio de Apache
+# Copia todo el contenido del proyecto al contenedor
 COPY . /var/www/html/
 
-# Crear carpetas y mover archivos para organizarlos
-RUN mkdir -p /var/www/html/js \
-    && mkdir -p /var/www/html/assets \
-    && mv /var/www/html/jquery-3.7.0.min.js /var/www/html/js/ \
-    && mv /var/www/html/jquery.jclockNew.js /var/www/html/js/ \
-    && mv /var/www/html/backblue.gif /var/www/html/assets/ \
-    && mv /var/www/html/fade.gif /var/www/html/assets/
+# Crear carpetas de destino
+RUN mkdir -p /var/www/html/js /var/www/html/assets
 
-# Ajustar permisos para que Apache pueda leer los archivos
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Mover archivos solo si existen (evita errores si faltan)
+RUN [ -f /var/www/html/jquery-3.7.0.min.js ] && mv /var/www/html/jquery-3.7.0.min.js /var/www/html/js/ || true && \
+    [ -f /var/www/html/jquery.jclockNew.js ] && mv /var/www/html/jquery.jclockNew.js /var/www/html/js/ || true && \
+    [ -f /var/www/html/backblue.gif ] && mv /var/www/html/backblue.gif /var/www/html/assets/ || true && \
+    [ -f /var/www/html/fade.gif ] && mv /var/www/html/fade.gif /var/www/html/assets/ || true
 
-# Exponer puerto 80
+# Ajustar permisos (opcional)
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
+
+# Exponer el puerto 80
 EXPOSE 80
 
-# Iniciar Apache en primer plano
+# Iniciar Apache
 CMD ["apache2-foreground"]
